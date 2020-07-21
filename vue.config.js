@@ -28,7 +28,7 @@ module.exports = {
         compress: true,// 配置热更新
 		// proxy: {       // 跨域
         //     '/api': {
-        //         target: '', //API服务器的地址
+        //         target: 'http://60.205.85.215', //API服务器的地址
         //         ws: true, //代理websockets
         //         changeOrigin: true, // 虚拟的站点需要更管origin
         //     }

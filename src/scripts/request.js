@@ -1,5 +1,5 @@
 import axios from 'axios'
-import Qs from 'qs'
+// import Qs from 'qs'
 import { sparkUrl } from './config'
 import { Message } from 'element-ui'
 
@@ -12,7 +12,7 @@ const service = axios.create({
     responseType: "json",
     withCredentials: true, // 是否允许带cookie
     headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
         'accept': 'application/json',
     }
@@ -78,7 +78,7 @@ function getRequest(url,params={}){
 function postRequest(url,params={}) {
     let fullUrl = sparkUrl + url
     return new Promise((resolve, reject) => {
-        axios.post(fullUrl, Qs.stringify(params))
+        axios.post(fullUrl, params)
         .then(response => {
             resolve(response.data)
         }).catch(err => {
@@ -110,7 +110,15 @@ function putRequest(url,params = {}){
  * @param {*} params
  */
 function getEventList(params) {
-    return getRequest('/api/eventslist.json', params)
+    return getRequest('/matchinfopage', params)
+}
+
+/**
+ * 按钮事件
+ * @param {*} params
+ */
+function postEvents(params) {
+    return postRequest('/event', params)
 }
 
 
@@ -118,6 +126,7 @@ export {
     getRequest,
     postRequest,
     putRequest,
-    getEventList
+    getEventList,
+    postEvents
 }
 

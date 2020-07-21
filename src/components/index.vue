@@ -2,7 +2,7 @@
     <div class="page-content">
         <el-table
             stripe
-            :data="tableData"
+            :data="matchList"
             :row-key="getRowKeys"
             :expand-row-keys="expands"
             style="font-size:16px"
@@ -60,8 +60,11 @@
                             :min="1" 
                             :max="30" 
                             label="补时"
+                            :disabled="minDisable"
                             v-model="minValue" 
                             @change="minChange"
+                            @focus="minDisable = true"
+                            @blur="minDisable = false"
                         ></el-input-number>
                         <span>分钟</span>
                         <el-button type="primary" plain @click="minAdd">提交补时</el-button>
@@ -71,8 +74,10 @@
         </el-table>
         <el-pagination
             background
-            :total="20"
+            :total="8"
             :page-size="5"
+            :current-page="currentPageIndex"
+            @current-change="currentPage"
             layout="prev, pager, next"
             class="flex flex_center"
             style="margin-top:20px">
@@ -82,7 +87,7 @@
 
 <script>
     import { Message } from 'element-ui'
-    import { getEventList } from '@/scripts/request'
+    import { getEventList, postEvents } from '@/scripts/request'
     
     export default {
         name: 'index',
@@ -111,7 +116,7 @@
                     },
                     {
                         label: '客队',
-                        prop: 'guest_team',
+                        prop: 'visit',
                         width: 125
                     },
                     {
@@ -174,88 +179,25 @@
                         plain: false
                     }
                 ],
-                tableData: [
-                    {
-                        "id": 0,
-                        "date": "2020-07-25",
-                        "time": "18:00",
-                        "week": "六",
-                        "host_team": "山东鲁能泰山",
-                        "guest_team": "北京中赫国安",
-                        "area": '苏州奥林匹克体育中心'
-                    },
-                    {
-                        "id": 1,
-                        "date": "2020-07-25",
-                        "time": "18:00",
-                        "week": "六",
-                        "host_team": "广州恒大淘宝",
-                        "guest_team": "北京中赫国安",
-                        "area": '大连体育中心体育场'
-                    },
-                    {
-                        "id": 2,
-                        "date": "2020-07-25",
-                        "time": "18:00",
-                        "week": "六",
-                        "host_team": "山东鲁能",
-                        "guest_team": "北京中赫国安",
-                        "area": '大连体育中心体育场'
-                    },
-                    {
-                        "id": 3,
-                        "date": "2020-07-25",
-                        "time": "18:00",
-                        "week": "六",
-                        "host_team": "山东鲁能",
-                        "guest_team": "北京中赫国安",
-                        "area": '大连体育中心体育场'
-                    },
-                    {
-                        "id": 4,
-                        "date": "2020-07-25",
-                        "time": "18:00",
-                        "week": "六",
-                        "host_team": "山东鲁能",
-                        "guest_team": "北京中赫国安",
-                        "area": '大连体育中心体育场'
-                    }
-                ],
+                matchList: [],             // 赛事列表
                 getRowKeys(row) {          // 获取当前行id
-                    return row.id
+                    return row.matchId
                 },
                 expands: [],               // 展开的行数id
                 minValue: 1,               // 补时时间值
                 type: '',                  // 参数type值
                 matchId: -1,               // 赛事id
+                minDisable: false,         // 禁止手动输入补时时长
+                currentPageIndex: 1,       // 当前页
             }
         },
         mounted() {
-            this.tableData.forEach(element => {
-                // 添加操作按钮
-                element.handBtnList = [
-                    {
-                        text: '主队开球',
-                        disabled: false
-                    },
-                    {
-                        text: '客队开球',
-                        disabled: false
-                    },
-                    {
-                        text: '上半场结束',
-                        disabled: false
-                    },
-                    {
-                        text: '下半场开始',
-                        disabled: false
-                    }
-                ]
-            })
+            this.getEventsData()
         },
         methods:{
             // 按钮初始
             eventInit() {
+                this.minValue = 1
                 this.hostBtnList[0].text = '主队危险进攻'
                 this.hostBtnList[0].type = 'primary'
                 this.hostBtnList[0].plain = false
@@ -264,20 +206,20 @@
                 this.guestBtnList[0].plain = false
             },
             // 主队,客队开球
-            eventsOpen(index, row, btnIndex ) {
+            eventsOpen( index, row, btnIndex ) {
                 this.eventInit()
-                this.matchId = row.id
+                this.matchId = row.matchId
                 // 主队开球
                 if ( btnIndex === 0 ) {
                     this.expands = []
-                    this.expands.push(row.id)
+                    this.expands.push(row.matchId)
                     row.handBtnList[1].disabled = true
                     this.type = 'KO1'
                 }
                 // 客队开球
                 if ( btnIndex === 1 ) {
                     this.expands = []
-                    this.expands.push(row.id)
+                    this.expands.push(row.matchId)
                     row.handBtnList[0].disabled = true
                     this.type = 'KO2'
                 }
@@ -289,18 +231,19 @@
                 // 下半场开始
                 if( btnIndex === 3 ) {
                     this.expands = []
-                    this.expands.push(row.id)
+                    this.expands.push(row.matchId)
                     this.type = 'Start RT2'
                 }
                 row.handBtnList[btnIndex].disabled = true
                 // 参数
                 let params = {
-                    match_id: row.id,
+                    match_id: row.matchId,
                     event:{
                         type: this.type,
-                        timestamp: Date.parse(new Date())
+                        timestamp: (new Date()).valueOf()
                     }
                 }
+                this.postEventsData(params)
             },
             // 进攻
             eventsAttack(index, team) {
@@ -356,9 +299,10 @@
                         match_id: this.matchId,
                         event:{
                             type: this.type,
-                            timestamp: Date.parse(new Date())
+                            timestamp: (new Date()).valueOf()
                         }
                     }
+                    this.postEventsData(params)
                 }
             },
             // 补时
@@ -375,35 +319,91 @@
                 }
                 let params = {
                     match_id: this.matchId,
-                    event:{
+                    event: {
                         stat: this.minValue,
                         type: this.type,
-                        timestamp: Date.parse(new Date())
+                        timestamp: (new Date()).valueOf()
                     }
                 }
+                this.postEventsData(params)
+            },
+            // 分页
+            currentPage(val) {
+                this.currentPageIndex = val
+                this.getEventsData()
+            },
+            // 获取赛事列表
+            getEventsData() {
+                // 获取赛事列表
+                let _this = this
+                let params = {
+                    page: _this.currentPageIndex
+                }
+                getEventList(params).then( res=> {
+                    _this.matchList = res
+                    _this.matchList.forEach(element => {
+                        // 添加操作按钮
+                        element.handBtnList = [
+                            {
+                                text: '主队开球',
+                                disabled: false
+                            },
+                            {
+                                text: '客队开球',
+                                disabled: false
+                            },
+                            {
+                                text: '上半场结束',
+                                disabled: false
+                            },
+                            {
+                                text: '下半场开始',
+                                disabled: false
+                            }
+                        ]
+                    })
+                })
+            },
+            // 接口方法
+            postEventsData(params) {
+                postEvents(params).then(res => {
+                    if(res === 1) {
+                        Message.success('操作成功')
+                    } else {
+                        Message.error('操作失败')
+                    }
+                })
             }
         },
         watch: {
-            matchId(oldVal,newVal) {
+            matchId( newVal, oldVal ) {
+                let _this = this
                 document.onkeydown = function(e) {
                     //事件对象兼容
                     let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
                     //按键1
-                    if (e1 && e1.keyCode == 49) {
-                        Message.success('主队进攻')
-                        this.type = 'AT1'
+                    if (e1 && e1.keyCode === 49) {
+                        Message.warning('主队进攻')
+                        let params = {
+                            match_id: newVal,
+                            event:{
+                                type: 'AT1',
+                                timestamp: (new Date()).valueOf()
+                            }
+                        }
+                        _this.postEventsData(params)
                     }
                     //按键2
-                    if (e1 && e1.keyCode == 50) {
-                        Message.success('客队进攻')
-                        this.type = 'AT2'
-                    }
-                    let params = {
-                        match_id: newVal,
-                        event:{
-                            type: this.type,
-                            timestamp: Date.parse(new Date())
+                    if (e1 && e1.keyCode === 50) {
+                        Message.warning('客队进攻')
+                        let params = {
+                            match_id: newVal,
+                            event:{
+                                type: 'AT2',
+                                timestamp: (new Date()).valueOf()
+                            }
                         }
+                        _this.postEventsData(params)
                     }
                 }
             }
