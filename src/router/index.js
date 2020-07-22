@@ -8,6 +8,7 @@ import { BASE_PATH } from '@/scripts/config'
 
 /* 异步引入路由 */
 const Index =() => import('@/components/index')
+const Data =() => import('@/components/data')
 
 const routes = [
     {
@@ -17,6 +18,14 @@ const routes = [
             title: 'events',
         },
         component: Index
+    },
+    {
+        path: '/datas',
+        name: 'data',
+        meta: {
+            title: 'data',
+        },
+        component: Data
     }
 ]
 

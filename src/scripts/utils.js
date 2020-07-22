@@ -1,5 +1,4 @@
 // import CryptoJS from 'crypto-js'
-import Vue from 'vue'
 /**
  * 设置title
  * @param title 参数
@@ -297,25 +296,6 @@ function resolveDeleteKey(str) {
     return str;
 }
 
-/**
- * 防止重复点击
- */
-function preventReClick(Vue) {
-    Vue.directive('preventReClick', {
-        inserted (el, binding) {
-            el.addEventListener('click', () => {
-                if (!el.disabled) {
-                    el.disabled = true
-                    setTimeout(() => {
-                        el.disabled = false
-                    }, binding.value || 3000)
-                }
-            })
-        }
-    })
-}
-
-
 export {
     setTitle,
     transHtml,
@@ -332,6 +312,5 @@ export {
     getTrueData,
     formatDate,
     resolveDeleteKey,
-    getCurrentDate,
-    preventReClick
+    getCurrentDate
 };
