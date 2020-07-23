@@ -14,7 +14,7 @@
                             }
                         ]"
                     >
-                        <p>[90:00]</p>
+                        <p>[{{gameTime}}]</p>
                         <div class="team flex flex_center">
                             <span>山东鲁能泰山</span>
                             <span class="score">
@@ -260,19 +260,21 @@
                 ],
                 websock: null,      // WebSocket
                 pageParam: {},      // 页面参数 
-                dataS: null    
+                dataS: null,
+                timer: null,
+                minute: 0,
+                second: 0,
+                gameTime: ''
             }
         },
         mounted () {
             this.pageParam = {
                 scoreA: 0,
                 scoreB: 0,
-                time: getUrlParam('game_time'),
                 match: getUrlParam('match'),
                 date: getUrlParam('date'),
                 teamA: getUrlParam('teamA'),
-                teamB: getUrlParam('teamB'),
-                type: ''
+                teamB: getUrlParam('teamB')
             }
             // 初始化
             this.initWebSocket()
@@ -311,7 +313,7 @@
                 // 重要事件弹框
                 this.eventArr.forEach( e => {
                     if(e.event === redata.event.type) {
-                        alert(e.info)
+                        MessageBox.alert(e.info)
                     }
                 })
             },
@@ -336,14 +338,53 @@
                         }
                     })
                 }
+            },
+            // 比赛时间计时
+            startTime(bolean) {
+                let _this = this
+                if (bolean === true) {
+                    _this.timer = setInterval(function () {
+                        if (_this.second >= 0) {
+                            _this.second++
+                            if(_this.second < 10) {
+                                _this.second = `0${_this.second}`
+                            }
+                        }
+                        if (_this.second > 59) {
+                            _this.second = 0
+                            _this.minute++
+                            if (_this.minute < 10) {
+                                _this.minute = `0${_this.minute}`
+                            }
+                        }
+                        _this.gameTime = `${_this.minute}:${_this.second}`
+                    }, 1000)
+                } else {
+                    clearInterval(_this.timer)
+                }
             }
-        },
-        computed: {
-
         },
         destroyed () {
             // 销毁监听
             this.websock.close()
+        },
+        watch: {
+            dataS(newVal,old) {
+                // 比赛静时间
+                if(this.dataS && this.dataS.event.type === 'Start') {
+                    this.startTime(true)
+                }
+                if(this.dataS && this.dataS.event.type === 'Stop RT1') {
+                    this.startTime(false)
+                    this.gameTime = '45:00'
+                }
+                if(this.dataS && this.dataS.event.type === 'Start RT2') {
+                    this.startTime(true)
+                }
+                if(this.dataS && this.dataS.event.type === 'Stop') {
+                    this.startTime(false)
+                }
+            }
         }
     }
 </script>
