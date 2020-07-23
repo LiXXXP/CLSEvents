@@ -19,22 +19,21 @@
             </div>
         </div>
         <div class="flex flex_between">
-            <div class="left" ref="chat_main" v-if="eventsList.length !== 0">
-                <div :class="['list',
+            <div class="left" ref="chat_main">
+                <div ref="events_list"
+                    :class="['list',
                         safeList.includes(item.event.type)?'Safe':
                         dangerList.includes(item.event.type)?'Danger':
                         offenseList.includes(item.event.type)?'Offense':''
                     ]"
                     v-for="item in eventsList"
                     :key=""
-                    ref="events_list">
+                >
                     <span>
-                        {{(new Date(parseInt(item.event.timestamp)).toLocaleTimeString())}}
+                        {{new Date(parseInt(item.event.timestamp)).toLocaleTimeString()}}
                     </span>
                     <span>[{{item.event.game_time}}]</span>
-                    <span>
-                        {{item.event.type}}
-                    </span>
+                    <span>{{item.event.type}}</span>
                     <span 
                         :class="[
                             'block',
@@ -52,7 +51,7 @@
                     </span>
                 </div>
             </div>
-            <div class="right" v-if="eventsList.length !== 0">
+            <div class="right">
                 <p class="title">赛事技术统计</p>
                 <div class="list flex flex_around"
                     v-for="item in datasList"
@@ -67,6 +66,7 @@
 </template>
 
 <script>
+    import { getUrlParam } from '@/scripts/utils'
     export default {
         data() {
             return {
@@ -182,9 +182,13 @@
                     'PEN1','PEN2','GK1','GK2'
                 ],
                 websock: null,     // WebSocket
+                pageParam: {},     // 页面参数
             }
         },
         mounted () {
+            this.pageParam = {
+                time: getUrlParam('game_time')
+            }
             // 初始化
             this.initWebSocket()
         },
@@ -204,7 +208,7 @@
             // 数据接收
             websocketonmessage(e){
                 const redata = JSON.parse(e.data)
-                // console.log(redata)
+                console.log(redata)
                 this.datasCount(redata)
                 this.eventsList.push(redata)
                 let _this = this
@@ -216,12 +220,19 @@
             websocketclose(e){
                 console.log('断开连接',e)
             },
+            // 赛事统计
             datasCount(data) {
                 this.datasList.forEach( e => {
                     if(e.type1 === data.event.type) {
                         e.home = data.event.stat
+                        if(data.event.stat) {
+                            e.home = data.event.scoreA
+                        }
                     } else if(e.type2 === data.event.type) {
                         e.away = data.event.stat
+                        if(!data.event.stat) {
+                            e.away = data.event.scoreB
+                        }
                     }
                 })
             }
