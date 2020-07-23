@@ -225,7 +225,7 @@
                 this.datasList.forEach( e => {
                     if(e.type1 === data.event.type) {
                         e.home = data.event.stat
-                        if(data.event.stat) {
+                        if(!data.event.stat) {
                             e.home = data.event.scoreA
                         }
                     } else if(e.type2 === data.event.type) {
