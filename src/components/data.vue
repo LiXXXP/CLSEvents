@@ -67,6 +67,7 @@
                         </span>
                         <span>[{{item.event.game_time}}]</span>
                         <span>{{item.event.type}}</span>
+                        <span>{{item.event.explain}}</span>
                         <span 
                             :class="[
                                 'block',
