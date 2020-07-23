@@ -9,11 +9,15 @@
             <div class="team flex flex_center">
                 <div class="flex flex_center">
                     <span>山东鲁能泰山</span>
-                    <span class="score">0</span>
+                    <span class="score">
+                        {{pageParam.scoreA}}
+                    </span>
                 </div>
                 <p>vs</p>
                 <div class="flex flex_center">
-                    <span class="score">0</span>
+                    <span class="score">
+                        {{pageParam.scoreB}}
+                    </span>
                     <span>北京中赫国安</span>
                 </div>
             </div>
@@ -181,12 +185,14 @@
                     'CR1','CR2','FK1','FK2',
                     'PEN1','PEN2','GK1','GK2'
                 ],
-                websock: null,     // WebSocket
-                pageParam: {},     // 页面参数
+                websock: null,      // WebSocket
+                pageParam: {},      // 页面参数     
             }
         },
         mounted () {
             this.pageParam = {
+                scoreA: 0,
+                scoreB: 0,
                 time: getUrlParam('game_time')
             }
             // 初始化
@@ -208,8 +214,13 @@
             // 数据接收
             websocketonmessage(e){
                 const redata = JSON.parse(e.data)
-                console.log(redata)
+                // console.log(redata)
                 this.datasCount(redata)
+                let goalArr = ['GOAL1','GOAL2']
+                if(goalArr.includes(redata.event.type)) {
+                    this.pageParam.scoreA = redata.event.scoreA
+                    this.pageParam.scoreB = redata.event.scoreB
+                }
                 this.eventsList.push(redata)
                 let _this = this
                 this.$nextTick(() => {
