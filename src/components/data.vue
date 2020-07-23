@@ -1,76 +1,113 @@
 <template>
-    <div class="page-content">
-        <div class="header">
-            <p>
-                <span>[90:00]</span>
-                <span>中超</span>
-                <span>2020/07/25 18:00</span>
-            </p>
-            <div class="team flex flex_center">
-                <div class="flex flex_center">
-                    <span>山东鲁能泰山</span>
-                    <span class="score">
-                        {{pageParam.scoreA}}
-                    </span>
-                </div>
-                <p>vs</p>
-                <div class="flex flex_center">
-                    <span class="score">
-                        {{pageParam.scoreB}}
-                    </span>
-                    <span>北京中赫国安</span>
-                </div>
-            </div>
-        </div>
-        <div class="flex flex_between">
-            <div class="left" ref="chat_main">
-                <div ref="events_list"
-                    :class="['list',
-                        safeList.includes(item.event.type)?'Safe':
-                        dangerList.includes(item.event.type)?'Danger':
-                        offenseList.includes(item.event.type)?'Offense':''
-                    ]"
-                    v-for="item in eventsList"
-                    :key=""
-                >
-                    <span>
-                        {{new Date(parseInt(item.event.timestamp)).toLocaleTimeString()}}
-                    </span>
-                    <span>[{{item.event.game_time}}]</span>
-                    <span>{{item.event.type}}</span>
-                    <span 
+    <div class="data-content" v-if="dataS">
+        <el-row>
+            <el-col :xs="16" :sm="16" :md="18" :lg="24" :xl="24">
+                <div class="header flex flex_between">
+                    <div
                         :class="[
                             'block',
-                            item.event.type.indexOf('1') > -1 ? 'home' : 'away'
+                            {
+                                'safe': dataS.event.type.indexOf('1') > -1 && safeList.includes(dataS.event.type),
+                                'danger': dataS.event.type.indexOf('1') > -1 && dangerList.includes(dataS.event.type),
+                                'offense': dataS.event.type.indexOf('1') > -1 && offenseList.includes(dataS.event.type),
+                                'unimport': dataS.event.type.indexOf('1') > -1 && unimportList.includes(dataS.event.type)
+                            }
                         ]"
                     >
-                            {{item.event.type.indexOf('1') > -1 ? 'Home': 'Away'}}
-                    </span>
-                    <span>
-                        {{
-                            safeList.includes(item.event.type)?'Safe':
-                            dangerList.includes(item.event.type)?'Danger':
-                            offenseList.includes(item.event.type)?'Offense':''
-                        }}
-                    </span>
+                        <p>[90:00]</p>
+                        <div class="team flex flex_center">
+                            <span>山东鲁能泰山</span>
+                            <span class="score">
+                                {{pageParam.scoreA}}
+                            </span>
+                        </div>
+                    </div>
+                    <div
+                        :class="[
+                            'block',
+                            {
+                                'safe': dataS.event.type.indexOf('2') > -1 && safeList.includes(dataS.event.type),
+                                'danger': dataS.event.type.indexOf('2') > -1 && dangerList.includes(dataS.event.type),
+                                'offense': dataS.event.type.indexOf('2') > -1 && offenseList.includes(dataS.event.type),
+                                'unimport': dataS.event.type.indexOf('2') > -1 && unimportList.includes(dataS.event.type)
+                            }
+                        ]"
+                    >
+                        <div class="match">
+                            <span>中超</span>
+                            <span>2020/07/25 18:00</span>
+                        </div>
+                        <div class="team flex flex_center">
+                            <span class="score">
+                                {{pageParam.scoreB}}
+                            </span>
+                            <span>北京中赫国安</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="right">
-                <p class="title">赛事技术统计</p>
-                <div class="list flex flex_around"
-                    v-for="item in datasList"
-                    :key="item.info">
-                    <p>{{item.home}}</p>
-                    <p>{{item.info}}</p>
-                    <p>{{item.away}}</p>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :xs="16" :sm="16" :md="18" :lg="24" :xl="24">
+                <div class="left" ref="chat_main">
+                    <div ref="events_list"
+                        :class="['list',
+                            {
+                                'safe': safeList.includes(item.event.type),
+                                'danger': dangerList.includes(item.event.type),
+                                'offense': offenseList.includes(item.event.type),
+                                'unimport': unimportList.includes(item.event.type)
+                            }
+                        ]"
+                        v-for="item in eventsList"
+                        :key=""
+                    >
+                        <span>
+                            {{new Date(parseInt(item.event.timestamp)).toLocaleTimeString()}}
+                        </span>
+                        <span>[{{item.event.game_time}}]</span>
+                        <span>{{item.event.type}}</span>
+                        <span 
+                            :class="[
+                                'block',
+                                item.event.type.indexOf('1') > -1 ? 'home' : 'away'
+                            ]"
+                        >
+                                {{item.event.type.indexOf('1') > -1 ? 'Home': 'Away'}}
+                        </span>
+                        <span>
+                            {{
+                                safeList.includes(item.event.type)?'Safe':
+                                dangerList.includes(item.event.type)?'Danger':
+                                offenseList.includes(item.event.type)?'Offense':
+                                unimportList.includes(item.event.type)?'':''
+                            }}
+                        </span>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :xs="16" :sm="16" :md="18" :lg="24" :xl="24">
+                <div class="right">
+                    <p class="title">赛事技术统计</p>
+                    <div class="list flex flex_around"
+                        v-for="item in datasList"
+                        :key="item.info">
+                        <p>{{item.home}}</p>
+                        <p>{{item.info}}</p>
+                        <p>{{item.away}}</p>
+                    </div>
+                </div>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
 <script>
+    import { MessageBox } from 'element-ui'
     import { getUrlParam } from '@/scripts/utils'
+
     export default {
         data() {
             return {
@@ -169,31 +206,73 @@
                     },
                     
                 ],
-                safeList: [
+                safeList: [    // 安全事件
                     'Start','Stop','SUB1',
                     'SUB2','SHB1','SHB2',
-                    'O1','O2','TI1','TI2',
                     'KO1','KO2','Start RT2',
                     'Stop RT1','OFF_DAT'
                 ],
-                dangerList: [
+                dangerList: [   // 危险事件
                     'SHG1','SHG2','GOAL1','GOAL2',
                     'RC1','RC2','YC1','YC2',
                     'F1','F2','ON_DAT1','ON_DAT2'
                 ],
-                offenseList: [
+                offenseList: [   // 进攻事件
                     'CR1','CR2','FK1','FK2',
                     'PEN1','PEN2','GK1','GK2'
                 ],
+                unimportList: [   // 不重要事件
+                    'O1','O2','TI1','TI2'
+                ],
+                eventArr: [    // 重要事件弹窗
+                    {
+                        event: 'GOAL1',
+                        info: '主队进球'
+                    },
+                    {
+                        event: 'GOAL2',
+                        info: '客队进球'
+                    },
+                    {
+                        event: 'RC1',
+                        info: '主队红牌'
+                    },
+                    {
+                        event: 'RC2',
+                        info: '客队红牌'
+                    },
+                    {
+                        event: 'PEN1',
+                        info: '主队点球'
+                    },
+                    {
+                        event: 'PEN2',
+                        info: '客队点球'
+                    },
+                    {
+                        event: 'CR1',
+                        info: '主队角球'
+                    },
+                    {
+                        event: 'CR2',
+                        info: '客队角球'
+                    }
+                ],
                 websock: null,      // WebSocket
-                pageParam: {},      // 页面参数     
+                pageParam: {},      // 页面参数 
+                dataS: null    
             }
         },
         mounted () {
             this.pageParam = {
                 scoreA: 0,
                 scoreB: 0,
-                time: getUrlParam('game_time')
+                time: getUrlParam('game_time'),
+                match: getUrlParam('match'),
+                date: getUrlParam('date'),
+                teamA: getUrlParam('teamA'),
+                teamB: getUrlParam('teamB'),
+                type: ''
             }
             // 初始化
             this.initWebSocket()
@@ -215,16 +294,25 @@
             websocketonmessage(e){
                 const redata = JSON.parse(e.data)
                 // console.log(redata)
+                this.dataS = redata
+                // 赛事统计
                 this.datasCount(redata)
                 let goalArr = ['GOAL1','GOAL2']
                 if(goalArr.includes(redata.event.type)) {
                     this.pageParam.scoreA = redata.event.scoreA
                     this.pageParam.scoreB = redata.event.scoreB
                 }
+                // 事件滚动
                 this.eventsList.push(redata)
                 let _this = this
                 this.$nextTick(() => {
                     _this.$refs.chat_main.scrollTop = _this.$refs.chat_main.scrollHeight
+                })
+                // 重要事件弹框
+                this.eventArr.forEach( e => {
+                    if(e.event === redata.event.type) {
+                        alert(e.info)
+                    }
                 })
             },
             // 关闭
@@ -233,20 +321,25 @@
             },
             // 赛事统计
             datasCount(data) {
-                this.datasList.forEach( e => {
-                    if(e.type1 === data.event.type) {
-                        e.home = data.event.stat
-                        if(!data.event.stat) {
-                            e.home = data.event.scoreA
-                        }
-                    } else if(e.type2 === data.event.type) {
-                        e.away = data.event.stat
-                        if(!data.event.stat) {
-                            e.away = data.event.scoreB
-                        }
+                if(!data.event.stat) {
+                    let goalArr = ['GOAL1','GOAL2']
+                    if(goalArr.includes(data.event.type)) {
+                        this.datasList[0].home = data.event.scoreA
+                        this.datasList[0].away = data.event.scoreB
                     }
-                })
+                } else {
+                    this.datasList.forEach( e => {
+                        if(e.type1 === data.event.type) {
+                            e.home = data.event.stat
+                        } else if(e.type2 === data.event.type) {
+                            e.away = data.event.stat
+                        }
+                    })
+                }
             }
+        },
+        computed: {
+
         },
         destroyed () {
             // 销毁监听
@@ -261,38 +354,42 @@
     @bg1: #83b271;
     @bg2: #f67280;
     @bg3: #ffb480;
-    @bg4: #7a9eb1;
-    .page-content {
+    @bg5: #eaeaea;
+    .data-content {
+        width: 880px;
+        margin: 0 auto;
         .header {
-            height: 100px;
-            padding: 20px 0;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             background-color: #ebeef5;
-            border-radius: 4px;
-            border: 1px solid #ebeef5;
+            border-radius: 0 0 4px 4px;
             box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-            p {
-                text-align: center;
-                span {
-                    padding: 0 10px;
-                    &:first-child {
+            .block {
+                width: calc(50%);
+                padding: 10px 0 15px;
+                box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+                p {
+                    text-align: right;
+                    font-weight: 600;
+                    margin-right: 20px;
+                }
+                .match {
+                    span {
+                        padding: 0 15px;
+                    }
+                }
+                .team {
+                    font-size: 22px;
+                    padding-top: 10px;
+                    .score {
+                        font-size: 30px;
+                        padding: 0 50px;
                         font-weight: 600;
                     }
                 }
             }
         }
-        .team {
-            font-size: 22px;
-            margin-top: 30px;
-            .score {
-                font-size: 30px;
-                padding: 0 50px;
-                font-weight: 600;
-            }
-        }
         .left {
-            width: 650px;
-            height: 600px;
+            height: 550px;
             overflow-y: auto;
             overflow-x: hidden;
             .list {
@@ -300,16 +397,6 @@
                 padding: 5px 0;
                 margin-bottom: 5px;
                 border-radius: 4px;
-                background-color: @bg4;
-                &.Safe {
-                    background-color: @bg1;
-                }
-                &.Danger {
-                    background-color: @bg2;
-                }
-                &.Offense {
-                    background-color: @bg3;
-                }
                 span {
                     margin-left: 20px;
                 }
@@ -327,8 +414,7 @@
             }
         }
         .right {
-            width: 450px;
-            height: 600px;
+            height: 550px;
             .title {
                 color: #eff0f4;
                 padding: 10px 0;
@@ -363,5 +449,17 @@
             border: 1px solid #ebeef5;
             box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
         }
+    }
+    .safe {
+        background-color: @bg1;
+    }
+    .danger {
+        background-color: @bg2;
+    }
+    .offense {
+        background-color: @bg3;
+    }
+    .unimport {
+        background-color: @bg5;
     }
 </style>

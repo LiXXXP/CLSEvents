@@ -11,7 +11,9 @@ import {
     Button, 
     InputNumber, 
     Option, 
-    Pagination 
+    Pagination,
+    Row,
+    Col
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(Table)
@@ -20,6 +22,8 @@ Vue.use(Button)
 Vue.use(InputNumber)
 Vue.use(Option)
 Vue.use(Pagination)
+Vue.use(Row)
+Vue.use(Col)
 
 /* 用于低版本浏览器兼容问题 es6语法兼容 */
 import 'babel-polyfill'
