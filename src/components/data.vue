@@ -436,7 +436,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             .list {
-                color: #434343;
+                color: #000;
                 padding: 5px 0;
                 margin-bottom: 5px;
                 border-radius: 4px;
