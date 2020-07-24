@@ -1,7 +1,7 @@
 var express = require('express')
 var app = express()
 app.use(express.static('dist'))
-app.get('/', function (req, res) {
+app.get('/controlboard', function (req, res) {
     res.sendFile(__dirname + "/dist/" + "index.html")
 })
 var server = app.listen(8081, function () {

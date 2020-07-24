@@ -261,10 +261,13 @@
                 ],
                 websock: null,      // WebSocket
                 pageParam: {},      // 页面参数 
-                dataS: null,
-                timer: null,
-                minute: 0,
-                second: 0,
+                dataS: null,        // webSocket最新数据
+                timer: null,        // 定时器
+                // 分钟
+                minute: localStorage.getItem('minute') || 0,
+                // 秒
+                second: localStorage.getItem('second') || 0,
+                // 比赛静时间
                 gameTime: '00:00'
             }
         },
@@ -279,6 +282,9 @@
             }
             // 初始化
             this.initWebSocket()
+            if(localStorage.getItem('minute') || localStorage.getItem('second')) {
+                this.startTime(true)
+            }
         },
         methods: {
             // 初始化weosocket
@@ -348,18 +354,25 @@
                     _this.timer = setInterval(function () {
                         if (_this.second >= 0) {
                             _this.second++
-                            if(_this.second < 10) {
-                                _this.second = `0${_this.second}`
-                            }
                         }
                         if (_this.second > 59) {
                             _this.second = 0
                             _this.minute++
-                            if (_this.minute < 10) {
-                                _this.minute = `0${_this.minute}`
-                            }
                         }
-                        _this.gameTime = `${_this.minute}:${_this.second}`
+                        let gameSecond, gameMinute
+                        if(_this.second < 10) {
+                            gameSecond = `0${_this.second}`
+                        } else {
+                            gameSecond = _this.second
+                        }
+                        if(_this.minute < 10) {
+                            gameMinute = `0${_this.minute}`
+                        } else {
+                            gameMinute = _this.minute
+                        }
+                        localStorage.setItem('minute',gameMinute)
+                        localStorage.setItem('second',gameSecond)
+                        _this.gameTime = `${gameMinute}:${gameSecond}`
                     }, 1000)
                 } else {
                     clearInterval(_this.timer)
@@ -379,12 +392,16 @@
                 if(this.dataS && this.dataS.event.type === 'Stop RT1') {
                     this.startTime(false)
                     this.gameTime = '45:00'
+                    localStorage.setItem('minute',45)
+                    localStorage.setItem('second',0)
                 }
                 if(this.dataS && this.dataS.event.type === 'Start RT2') {
                     this.startTime(true)
                 }
                 if(this.dataS && this.dataS.event.type === 'Stop') {
                     this.startTime(false)
+                    localStorage.removeItem('minute')
+                    localStorage.removeItem('second')
                 }
             }
         }
