@@ -106,7 +106,7 @@
 </template>
 
 <script>
-    import { MessageBox } from 'element-ui'
+    import { MessageBox, Message } from 'element-ui'
     import { getUrlParam } from '@/scripts/utils'
 
     export default {
@@ -265,7 +265,7 @@
                 timer: null,
                 minute: 0,
                 second: 0,
-                gameTime: ''
+                gameTime: '00:00'
             }
         },
         mounted () {
@@ -321,6 +321,7 @@
             // 关闭
             websocketclose(e){
                 console.log('断开连接',e)
+                Message.error('连接断开')
             },
             // 赛事统计
             datasCount(data) {
@@ -435,7 +436,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             .list {
-                color: #fff;
+                color: #434343;
                 padding: 5px 0;
                 margin-bottom: 5px;
                 border-radius: 4px;
