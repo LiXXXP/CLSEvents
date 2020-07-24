@@ -218,7 +218,8 @@
                     'ON_DAT1','ON_DAT2','DFK1','DFK2',
                     'CONF_GOAL1','CONF_GOAL2','CGOAL1','CGOAL2',
                     'YC_RC1','YC_RC2','PEN1','PEN2','CR1','CR2',
-                    'F1','F2','SHG1','SHG2','SHB1','SHB2'
+                    'F1','F2','SHG1','SHG2','SHB1','SHB2','CSAFE1',
+                    'CSAFE2'
                 ],
                 offenseList: [   // 进攻事件 橙色
                     'FK1','FK2','AT1','AT2','YC1','YC2'
@@ -282,10 +283,6 @@
                 pageParam: {},      // 页面参数 
                 dataS: null,        // webSocket最新数据
                 timer: null,        // 定时器
-                // 分钟
-                minute: localStorage.getItem('minute') || 0,
-                // 秒
-                second: localStorage.getItem('second') || 0,
                 // 比赛静时间
                 gameTime: '00:00'
             }
@@ -303,14 +300,14 @@
             // 初始化
             this.initWebSocket()
             if(localStorage.getItem('minute') || localStorage.getItem('second')) {
-                this.startTime(true)
+                this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
             }
         },
         methods: {
             // 初始化weosocket
             initWebSocket(){
-                const wsuri = "ws://47.95.42.37/bcjj/football/websocket/server"
-                // const wsuri = `ws://47.95.42.37/bcjj/football/websocket/${this.pageParam.channel}`
+                // const wsuri = "ws://47.95.42.37/bcjj/football/websocket/server"
+                const wsuri = `ws://47.95.42.37/bcjj/football/websocket/${this.pageParam.channel}`
                 this.websock = new WebSocket(wsuri)
                 this.websock.onmessage = this.websocketonmessage
                 this.websock.onerror = this.websocketonerror
@@ -372,30 +369,30 @@
                 }
             },
             // 比赛时间计时
-            startTime(bolean) {
+            startTime(bolean,minute,second) {
                 let _this = this
                 if (bolean === true) {
                     _this.timer = setInterval(function () {
-                        if (_this.second >= 0) {
-                            _this.second++
+                        if (second >= 0) {
+                            second++
                         }
-                        if (_this.second > 59) {
-                            _this.second = 0
-                            _this.minute++
+                        if (second > 59) {
+                            second = 0
+                            minute++
                         }
                         let gameSecond, gameMinute
-                        if(_this.second < 10) {
-                            gameSecond = `0${_this.second}`
+                        if(second < 10) {
+                            gameSecond = `0${second}`
                         } else {
-                            gameSecond = _this.second
+                            gameSecond = second
                         }
-                        if(_this.minute < 10) {
-                            gameMinute = `0${_this.minute}`
+                        if(minute < 10) {
+                            gameMinute = `0${minute}`
                         } else {
-                            gameMinute = _this.minute
+                            gameMinute = minute
                         }
-                        localStorage.setItem('minute',gameMinute)
-                        localStorage.setItem('second',gameSecond)
+                        localStorage.setItem('minute',minute)
+                        localStorage.setItem('second',second)
                         _this.gameTime = `${gameMinute}:${gameSecond}`
                     }, 1000)
                 } else {
@@ -411,21 +408,23 @@
             dataS(newVal,old) {
                 // 比赛静时间
                 if(this.dataS && this.dataS.event.type === 'Start') {
-                    this.startTime(true)
+                    localStorage.setItem('minute',0)
+                    localStorage.setItem('second',0)
+                    this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
                 }
                 if(this.dataS && this.dataS.event.type === 'Stop RT1') {
                     this.startTime(false)
                     this.gameTime = '45:00'
-                    localStorage.setItem('minute',45)
-                    localStorage.setItem('second',0)
                 }
                 if(this.dataS && this.dataS.event.type === 'Start RT2') {
-                    this.startTime(true)
+                    localStorage.setItem('minute',45)
+                    localStorage.setItem('second',0)
+                    this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
                 }
                 if(this.dataS && this.dataS.event.type === 'Stop') {
-                    this.startTime(false)
                     localStorage.removeItem('minute')
                     localStorage.removeItem('second')
+                    this.startTime(false)
                 }
             }
         }
@@ -458,10 +457,13 @@
                     padding-right: 20px;
                 }
                 .team {
-                    font-size: 22px;
+                    font-size: 20px;
                     padding-top: 10px;
                     p:first-child {
+                        width: 300px;
                         height: 58px;
+                        word-break: keep-all;
+                        word-wrap: break-word;
                     }
                     .score {
                         font-size: 30px;
