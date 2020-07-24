@@ -421,7 +421,7 @@
                     localStorage.setItem('second',0)
                     this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
                 }
-                if(this.dataS && this.dataS.event.type === 'Stop' || localStorage.getItem('minute')>99) {
+                if((this.dataS && this.dataS.event.type === 'Stop') || localStorage.getItem('minute')>99) {
                     localStorage.removeItem('minute')
                     localStorage.removeItem('second')
                     this.startTime(false)
