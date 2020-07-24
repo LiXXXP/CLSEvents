@@ -14,12 +14,14 @@
                             }
                         ]"
                     >
-                        <p>[{{gameTime}}]</p>
-                        <div class="team flex flex_center">
-                            <span>山东鲁能泰山</span>
-                            <span class="score">
+                        <p class="game-time">
+                            [{{gameTime}}]
+                        </p>
+                        <div class="team flex flex_column flex_center">
+                            <p>{{pageParam.teamA}}</p>
+                            <p class="score">
                                 {{pageParam.scoreA}}
-                            </span>
+                            </p>
                         </div>
                     </div>
                     <div
@@ -33,15 +35,14 @@
                             }
                         ]"
                     >
-                        <div class="match">
-                            <span>中超</span>
-                            <span>2020/07/25 18:00</span>
-                        </div>
-                        <div class="team flex flex_center">
-                            <span class="score">
+                        <p style="text-align:left;padding-left:20px">
+                            {{pageParam.date}} {{pageParam.time}}
+                        </p>
+                        <div class="team flex flex_column flex_center">
+                            <p>{{pageParam.teamB}}</p>
+                            <p class="score">
                                 {{pageParam.scoreB}}
-                            </span>
-                            <span>北京中赫国安</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -207,57 +208,75 @@
                     },
                     
                 ],
-                safeList: [    // 安全事件
-                    'Start','Stop','SUB1',
-                    'SUB2','SHB1','SHB2',
-                    'KO1','KO2','Start RT2',
-                    'Stop RT1','OFF_DAT'
-                ],
-                dangerList: [   // 危险事件
-                    'SHG1','SHG2','GOAL1','GOAL2',
-                    'RC1','RC2','YC1','YC2',
-                    'F1','F2','ON_DAT1','ON_DAT2'
-                ],
-                offenseList: [   // 进攻事件
-                    'CR1','CR2','FK1','FK2',
-                    'PEN1','PEN2','GK1','GK2'
-                ],
-                unimportList: [   // 不重要事件
+                safeList: [    // 安全事件 绿色
+                    'SAFE1','SAFE2','OFF_AT1','OFF_AT2',
+                    'OFF_DAT1','OFF_DAT2','GK1','GK2',
                     'O1','O2','TI1','TI2'
+                ],
+                dangerList: [   // 危险事件 红色
+                    'GOAL1','GOAL2','RC1','RC2',
+                    'ON_DAT1','ON_DAT2','DFK1','DFK2',
+                    'CONF_GOAL1','CONF_GOAL2','CGOAL1','CGOAL2',
+                    'YC_RC1','YC_RC2','PEN1','PEN2','CR1','CR2',
+                    'F1','F2','SHG1','SHG2','SHB1','SHB2'
+                ],
+                offenseList: [   // 进攻事件 橙色
+                    'FK1','FK2','AT1','AT2','YC1','YC2'
+                ],
+                unimportList: [   // 不重要事件 白色
+                    'Start','Stop','SUB1','SUB2','KO1','KO2',
+                    'Stop RT1','Start RT2','Extra Time1','Extra Time2',
+                    'Player Injured'
                 ],
                 eventArr: [    // 重要事件弹窗
                     {
-                        event: 'GOAL1',
-                        info: '主队进球'
+                        event: 'F1',
+                        info: 'Foul Home'
                     },
                     {
-                        event: 'GOAL2',
-                        info: '客队进球'
-                    },
-                    {
-                        event: 'RC1',
-                        info: '主队红牌'
-                    },
-                    {
-                        event: 'RC2',
-                        info: '客队红牌'
-                    },
-                    {
-                        event: 'PEN1',
-                        info: '主队点球'
-                    },
-                    {
-                        event: 'PEN2',
-                        info: '客队点球'
+                        event: 'F2',
+                        info: 'Foul Away'
                     },
                     {
                         event: 'CR1',
-                        info: '主队角球'
+                        info: 'Corner Home'
                     },
                     {
                         event: 'CR2',
-                        info: '客队角球'
-                    }
+                        info: 'Corner Away'
+                    },
+                    {
+                        event: 'GOAL1',
+                        info: 'Goal Home'
+                    },
+                    {
+                        event: 'GOAL2',
+                        info: 'Goal Away'
+                    },
+                    {
+                        event: 'RC1',
+                        info: 'Red Card Home'
+                    },
+                    {
+                        event: 'RC2',
+                        info: 'Red Card Away'
+                    },
+                    {
+                        event: 'YC1',
+                        info: 'Yellow Card Home'
+                    },
+                    {
+                        event: 'YC2',
+                        info: 'Yellow Card Away'
+                    },
+                    {
+                        event: 'PEN1',
+                        info: 'Penalty kick Home'
+                    },
+                    {
+                        event: 'PEN2',
+                        info: 'Penalty kick Away'
+                    },
                 ],
                 websock: null,      // WebSocket
                 pageParam: {},      // 页面参数 
@@ -275,10 +294,11 @@
             this.pageParam = {
                 scoreA: 0,
                 scoreB: 0,
-                match: getUrlParam('match'),
                 date: getUrlParam('date'),
+                time: getUrlParam('time'),
                 teamA: getUrlParam('teamA'),
-                teamB: getUrlParam('teamB')
+                teamB: getUrlParam('teamB'),
+                channel: getUrlParam('channel')
             }
             // 初始化
             this.initWebSocket()
@@ -288,8 +308,9 @@
         },
         methods: {
             // 初始化weosocket
-            initWebSocket(){ 
+            initWebSocket(){
                 const wsuri = "ws://47.95.42.37/bcjj/football/websocket/server"
+                // const wsuri = `ws://47.95.42.37/bcjj/football/websocket/${this.pageParam.channel}`
                 this.websock = new WebSocket(wsuri)
                 this.websock.onmessage = this.websocketonmessage
                 this.websock.onerror = this.websocketonerror
@@ -320,7 +341,10 @@
                 // 重要事件弹框
                 this.eventArr.forEach( e => {
                     if(e.event === redata.event.type) {
-                        MessageBox.alert(e.info)
+                        MessageBox({
+                            message: e.info,
+                            confirmButtonText: 'ok'
+                        })
                     }
                 })
             },
@@ -331,7 +355,7 @@
             },
             // 赛事统计
             datasCount(data) {
-                if(!data.event.stat) {
+                if( typeof(data.event.stat) == 'undefined' ) {
                     let goalArr = ['GOAL1','GOAL2']
                     if(goalArr.includes(data.event.type)) {
                         this.datasList[0].home = data.event.scoreA
@@ -425,21 +449,20 @@
             box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
             .block {
                 width: calc(50%);
+                text-align: center;
                 padding: 10px 0 15px;
                 box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-                p {
-                    text-align: right;
+                .game-time {
                     font-weight: 600;
-                    margin-right: 20px;
-                }
-                .match {
-                    span {
-                        padding: 0 15px;
-                    }
+                    text-align: right;
+                    padding-right: 20px;
                 }
                 .team {
                     font-size: 22px;
                     padding-top: 10px;
+                    p:first-child {
+                        height: 58px;
+                    }
                     .score {
                         font-size: 30px;
                         padding: 0 50px;

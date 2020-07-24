@@ -198,7 +198,7 @@
                             {
                                 btnType: 'warning',
                                 default: '主队两黄变一红',
-                                info: '2YC_RC1'
+                                info: 'YC_RC1'
                             },
                             {
                                 btnType: 'success',
@@ -256,7 +256,7 @@
                             {
                                 btnType: 'warning',
                                 default: '客队两黄变一红',
-                                info: '2YC_RC2'
+                                info: 'YC_RC2'
                             },
                             {
                                 btnType: 'success',
