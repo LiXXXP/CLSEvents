@@ -2,72 +2,64 @@
     <div class="page-content">
         <el-table
             stripe
+            highlight-current-row
             :data="matchList"
             :row-key="getRowKeys"
             :expand-row-keys="expands"
             style="font-size:16px"
+            @expand-change="toggleRowExpansion"
+            @current-change="toggleRowExpansion"
         >
             <el-table-column 
                 v-for="item in labelList"
                 :key="item.label"
                 :label="item.label" 
-                :prop="item.prop" 
-                :width="item.width"
+                :prop="item.prop"
             ></el-table-column>
-            <el-table-column label="操作">
-                <template slot-scope="scope">
-                    <div class="flex flex_start">
-                        <el-button
-                            v-for="(item,index) in scope.row.handBtnList"
-                            :key="item.text"
-                            :disabled="item.disabled" 
-                            @click="eventsOpen(scope.$index, scope.row, index)"
-                        >{{item.text}}</el-button>
-                    </div>
-                </template>
-            </el-table-column>
             <el-table-column type="expand">
                 <template slot-scope="props">
-                    <div class="teams flex flex_around">
-                        <p>主队</p>
-                        <p>客队</p>
+                    <div class="flex flex_start flex_center">
+                        <el-button
+                            v-for="(item,index) in handBtnList"
+                            :key="item.text"
+                            :disabled="item.disabled" 
+                            @click="eventsOpen(index)"
+                        >{{item.text}}</el-button>
                     </div>
-                    <div class="flex flex_around">
-                        <div class="btn flex flex_column">
-                            <el-button
-                                v-for="(item,index) in hostBtnList"
-                                :key="item.text"
-                                :type="item.type" 
-                                :plain="item.plain"
-                                style="width:100%;margin:0 0 20px 0;"
-                                @click="eventsAttack(index,'1')"
-                            >{{item.text}}</el-button>
+                    <div class="btns">
+                        <div class="teams flex flex_around">
+                            <p>主队</p>
+                            <p>客队</p>
                         </div>
-                        <div class="btn flex flex_column">
-                            <el-button 
-                                v-for="(item,index) in guestBtnList"
-                                :key="item.text"
-                                :type="item.type" 
-                                :plain="item.plain"
-                                style="width:100%;margin:0 0 20px 0;"
-                                @click="eventsAttack(index,'2')"
-                            >{{item.text}}</el-button>
+                        <div class="flex flex_around">
+                            <div class="btn flex flex_column"
+                                v-for="(item,index) in teamBtnList"
+                                :key="item.i">
+                                <el-button
+                                    v-for="(key,btnindex) in item.btnList"
+                                    :key="key.default"
+                                    :type="key.btnType" 
+                                    :plain="key.plain"
+                                    style="width:100%;margin:0 0 10px 0;"
+                                    @click="eventsAttack(index,btnindex,item.i)"
+                                >{{key.default}}</el-button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex flex_center" style="margin-top:20px;">
-                        <span>补时</span>
-                        <el-input-number 
-                            :min="1" 
-                            :max="30" 
-                            label="补时"
-                            :disabled="minDisable"
-                            v-model="minValue" 
-                            @change="minChange"
-                            @focus="minDisable = true"
-                            @blur="minDisable = false"
-                        ></el-input-number>
-                        <span>分钟</span>
-                        <el-button type="primary" plain @click="minAdd">提交补时</el-button>
+                        <div class="flex flex_center" style="margin-top:20px;">
+                            <span>补时</span>
+                            <el-input-number 
+                                :min="1" 
+                                :max="30" 
+                                label="补时"
+                                :disabled="minDisable"
+                                v-model="minValue" 
+                                @change="minChange"
+                                @focus="minDisable = true"
+                                @blur="minDisable = false"
+                            ></el-input-number>
+                            <span>分钟</span>
+                            <el-button type="primary" plain @click="minAdd">提交补时</el-button>
+                        </div>
                     </div>
                 </template>
             </el-table-column>
@@ -97,88 +89,30 @@
                     {
                         label: '比赛日期',
                         prop: 'date',
-                        width: 110
                     },
                     {
                         label: '时间',
                         prop: 'time',
-                        width: 70
                     },
                     {
                         label: '星期',
                         prop: 'week',
-                        width: 60
                     },
                     {
                         label: '主队',
                         prop: 'host_team',
-                        width: 125
                     },
                     {
                         label: '客队',
                         prop: 'visit',
-                        width: 125
                     },
                     {
                         label: '场地',
                         prop: 'area',
-                        width: 190
                     }
                 ],
-                hostBtnList: [             // 主队操作按钮列表
-                    {
-                        type: 'primary',
-                        text: '主队危险进攻',
-                        plain: false
-                    },
-                    {
-                        type: 'success',
-                        text: '主队进攻',
-                        plain: false
-                    },
-                    {
-                        type: 'info',
-                        text: '主队危险任意球',
-                        plain: false
-                    },
-                    {
-                        type: 'warning',
-                        text: '主队进球确认',
-                        plain: false
-                    },
-                    {
-                        type: 'danger',
-                        text: '主队进球取消',
-                        plain: false
-                    }
-                ],
-                guestBtnList: [             // 客队操作按钮列表
-                    {
-                        type: 'primary',
-                        text: '客队危险进攻',
-                        plain: false
-                    },
-                    {
-                        type: 'success',
-                        text: '客队进攻',
-                        plain: false
-                    },
-                    {
-                        type: 'info',
-                        text: '客队危险任意球',
-                        plain: false
-                    },
-                    {
-                        type: 'warning',
-                        text: '客队进球确认',
-                        plain: false
-                    },
-                    {
-                        type: 'danger',
-                        text: '客队进球取消',
-                        plain: false
-                    }
-                ],
+                handBtnList: [],           // 主客队开球按钮
+                teamBtnList: [],           // 主客队操控按钮
                 matchList: [],             // 赛事列表
                 getRowKeys(row) {          // 获取当前行id
                     return row.matchId
@@ -187,57 +121,187 @@
                 minValue: 1,               // 补时时间值
                 type: '',                  // 参数type值
                 matchId: -1,               // 赛事id
+                isOpen: false,             // 是否点击开球
                 minDisable: false,         // 禁止手动输入补时时长
                 currentPageIndex: 1,       // 当前页
             }
         },
         mounted() {
             this.getEventsData()
+            this.eventInit()
         },
         methods:{
             // 按钮初始
             eventInit() {
-                this.minValue = 1
-                this.hostBtnList[0].text = '主队危险进攻'
-                this.hostBtnList[0].type = 'primary'
-                this.hostBtnList[0].plain = false
-                this.guestBtnList[0].text = '客队危险进攻'
-                this.guestBtnList[0].type = 'primary'
-                this.guestBtnList[0].plain = false
+                this.minValue = 1 // 补时时间值
+                // 主客队开球按钮
+                this.handBtnList = [
+                    {
+                        text: '主队开球',
+                        disabled: false
+                    },
+                    {
+                        text: '客队开球',
+                        disabled: false
+                    },
+                    {
+                        text: '上半场结束',
+                        disabled: false
+                    },
+                    {
+                        text: '下半场开始',
+                        disabled: false
+                    }
+                ]
+                // 主客队操控按钮
+                this.teamBtnList = [
+                    {
+                        i: '1',
+                        btnList: [
+                            {
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '主队进攻',
+                                text2: '主队进攻中...',
+                                default: '主队进攻',
+                                info1: 'AT1',
+                                info2: 'OFF_AT1',
+                                plain: false,
+                            },
+                            {
+                                btnType: 'primary',
+                                type1: 'primary',
+                                type2: 'danger',
+                                text1: '主队危险进攻',
+                                text2: '主队危险中...',
+                                default: '主队危险进攻',
+                                info1: 'ON_DAT1',
+                                info2: 'OFF_DAT1',
+                                plain: false,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '主队危险任意球',
+                                info: 'DFK1'
+                            },
+                            {
+                                btnType: 'warning',
+                                default: '主队进球确认',
+                                info: 'CONF_GOAL1'
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '主队进球取消',
+                                info: 'CGOAL1'
+                            },
+                            {
+                                btnType: 'warning',
+                                default: '主队两黄变一红',
+                                info: '2YC_RC1'
+                            },
+                            {
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '主队安全',
+                                text2: '主队安全中...',
+                                default: '主队安全',
+                                plain: false,
+                                info1: 'SAFE1',
+                                info2: 'CSAFE1',
+                            }
+                        ]
+                    },
+                    {
+                        i: '2',
+                        btnList: [
+                            {
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '客队进攻',
+                                text2: '客队进攻中...',
+                                default: '客队进攻',
+                                info1: 'AT2',
+                                info2: 'OFF_AT2',
+                                plain: false,
+                            },
+                            {
+                                btnType: 'primary',
+                                type1: 'primary',
+                                type2: 'danger',
+                                text1: '客队危险进攻',
+                                text2: '客队危险中...',
+                                default: '客队危险进攻',
+                                info1: 'ON_DAT2',
+                                info2: 'OFF_DAT2',
+                                plain: false,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '客队危险任意球',
+                                info: 'DFK2'
+                            },
+                            {
+                                btnType: 'warning',
+                                default: '客队进球确认',
+                                info: 'CONF_GOAL2'
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '客队进球取消',
+                                info: 'CGOAL2'
+                            },
+                            {
+                                btnType: 'warning',
+                                default: '客队两黄变一红',
+                                info: '2YC_RC2'
+                            },
+                            {
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '客队安全',
+                                text2: '客队安全中...',
+                                default: '客队安全',
+                                info1: 'SAFE2',
+                                info2: 'CSAFE2',
+                                plain: false,
+                            }
+                        ]
+                    }
+                ]
+            },
+            // 展开行
+            toggleRowExpansion(row){
+                this.expands = []
+                this.eventInit()
+                this.expands.push(row.matchId)
+                this.matchId = row.matchId
             },
             // 主队,客队开球
-            eventsOpen( index, row, btnIndex ) {
-                this.eventInit()
-                this.matchId = row.matchId
-                // 主队开球
-                if ( btnIndex === 0 ) {
-                    this.expands = []
-                    this.expands.push(row.matchId)
-                    row.handBtnList[1].disabled = true
+            eventsOpen( btnIndex ) {
+                if ( btnIndex === 0 ) { // 主队开球
+                    this.handBtnList[1].disabled = true
                     this.type = 'KO1'
+                    this.isOpen = true
                 }
-                // 客队开球
-                if ( btnIndex === 1 ) {
-                    this.expands = []
-                    this.expands.push(row.matchId)
-                    row.handBtnList[0].disabled = true
+                if ( btnIndex === 1 ) { // 客队开球
+                    this.handBtnList[0].disabled = true
                     this.type = 'KO2'
+                    this.isOpen = true
                 }
-                // 上半场结束
-                if( btnIndex === 2 ) {
-                    this.expands = []
+                if( btnIndex === 2 ) { // 上半场结束
                     this.type = 'Stop RT1'
                 }
-                // 下半场开始
-                if( btnIndex === 3 ) {
-                    this.expands = []
-                    this.expands.push(row.matchId)
+                if( btnIndex === 3 ) { // 下半场开始
                     this.type = 'Start RT2'
                 }
-                row.handBtnList[btnIndex].disabled = true
+                this.handBtnList[btnIndex].disabled = true
                 // 参数
                 let params = {
-                    match_id: row.matchId,
+                    match_id: this.matchId,
                     event:{
                         type: this.type,
                         timestamp: (new Date()).valueOf()
@@ -246,53 +310,23 @@
                 this.postEventsData(params)
             },
             // 进攻
-            eventsAttack(index, team) {
-                if(this.matchId === -1) {
+            eventsAttack(index, btnIndex, team) {
+                if(!this.isOpen) {
                     Message.error('请先选择开球')
                 } else {
-                    // 危险进攻
-                    if(index === 0) {
-                        if (team === '1') {
-                            if(this.hostBtnList[index].plain) {
-                                this.hostBtnList[index].text = '主队危险进攻'
-                                this.hostBtnList[index].type = 'primary'
-                                this.hostBtnList[index].plain = false
-                                this.type = 'OFF_DAT' + team
-                            } else {
-                                this.hostBtnList[index].text = '主队危险中...'
-                                this.hostBtnList[index].type = 'danger'
-                                this.hostBtnList[index].plain = true
-                                this.type = 'ON_DAT' + team
-                            }
-                        } else {
-                            if(this.guestBtnList[index].plain) {
-                                this.guestBtnList[index].text = '客队危险进攻'
-                                this.guestBtnList[index].type = 'primary'
-                                this.guestBtnList[index].plain = false
-                                this.type = 'OFF_DAT' + team
-                            } else {
-                                this.guestBtnList[index].text = '客队危险中...'
-                                this.guestBtnList[index].type = 'danger'
-                                this.guestBtnList[index].plain = true
-                                this.type = 'ON_DAT2' + team
-                            }
-                        }
-                    }
-                    // 进攻
-                    if(index === 1) {
-                        this.type = 'AT' + team
-                    }
-                    // 危险任意球
-                    if(index === 2) {
-                        this.type = 'DFK' + team
-                    }
-                    // 进球确认
-                    if(index === 3) {
-                        this.type = 'CONF_GOAL' + team
-                    }
-                    // 进球取消
-                    if(index === 4) {
-                        this.type = 'CGOAL' + team
+                    let btnThis = this.teamBtnList[index].btnList[btnIndex]
+                    if( typeof(btnThis.plain) == 'undefined' ) {
+                        this.type = btnThis.info
+                    } else if(btnThis.plain) {
+                        btnThis.default = btnThis.text1
+                        btnThis.btnType = btnThis.type1
+                        btnThis.plain = false
+                        this.type = btnThis.info2
+                    } else {
+                        btnThis.default = btnThis.text2
+                        btnThis.btnType = btnThis.type2
+                        btnThis.plain = true
+                        this.type = btnThis.info1
                     }
                     // 参数
                     let params = {
@@ -341,27 +375,6 @@
                 }
                 getEventList(params).then( res=> {
                     _this.matchList = res
-                    _this.matchList.forEach(element => {
-                        // 添加操作按钮
-                        element.handBtnList = [
-                            {
-                                text: '主队开球',
-                                disabled: false
-                            },
-                            {
-                                text: '客队开球',
-                                disabled: false
-                            },
-                            {
-                                text: '上半场结束',
-                                disabled: false
-                            },
-                            {
-                                text: '下半场开始',
-                                disabled: false
-                            }
-                        ]
-                    })
                 })
             },
             // 接口方法
@@ -381,25 +394,32 @@
                 document.onkeydown = function(e) {
                     //事件对象兼容
                     let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
+                    let btnThis = ''
                     //按键1
                     if (e1 && e1.keyCode === 49) {
-                        Message.warning('主队进攻')
-                        let params = {
-                            match_id: newVal,
-                            event:{
-                                type: 'AT1',
-                                timestamp: (new Date()).valueOf()
-                            }
-                        }
-                        _this.postEventsData(params)
+                        btnThis = _this.teamBtnList[0].btnList[0]
                     }
                     //按键2
                     if (e1 && e1.keyCode === 50) {
-                        Message.warning('客队进攻')
+                        btnThis = _this.teamBtnList[1].btnList[0]
+                    }
+                    if(e1 && e1.keyCode === 49 || e1 && e1.keyCode === 50) {
+                        if(btnThis.plain) {
+                            btnThis.default = btnThis.text1
+                            btnThis.btnType = btnThis.type1
+                            btnThis.plain = false
+                            _this.type = btnThis.info2
+                        } else {
+                            btnThis.default = btnThis.text2
+                            btnThis.btnType = btnThis.type2
+                            btnThis.plain = true
+                            _this.type = btnThis.info1
+                        }
+                        Message.warning(btnThis.default)
                         let params = {
                             match_id: newVal,
                             event:{
-                                type: 'AT2',
+                                type: _this.type,
                                 timestamp: (new Date()).valueOf()
                             }
                         }
@@ -416,21 +436,13 @@
         .teams {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .btn {
             width: 160px;
         }
         span {
             padding: 0 20px;
-        }
-    }
-</style>
-
-<style lang="less">
-    .el-table__expand-column {
-        .cell {
-            display: none;
         }
     }
 </style>
