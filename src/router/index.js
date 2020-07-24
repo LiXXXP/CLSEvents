@@ -12,7 +12,7 @@ const Data =() => import('@/components/data')
 
 const routes = [
     {
-        path: '/',
+        path: '/controlboard',
         name: 'index',
         meta: {
             title: 'events',
