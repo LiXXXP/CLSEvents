@@ -226,15 +226,16 @@
                     'O1','O2','TI1','TI2'
                 ],
                 dangerList: [   // 危险事件 红色
-                    'GOAL1','GOAL2','RC1','RC2',
+                    'GOAL1','GOAL2','RC1','RC2','REDCARD1','REDCARD2',
                     'ON_DAT1','ON_DAT2','DFK1','DFK2',
                     'CONF_GOAL1','CONF_GOAL2','CGOAL1','CGOAL2',
                     'YC_RC1','YC_RC2','PEN1','PEN2','CR1','CR2',
                     'F1','F2','SHG1','SHG2','SHB1','SHB2','CSAFE1',
-                    'CSAFE2'
+                    'CSAFE2','PENALTY1','PENALTY2','CORNER1','CORNER2',
+                    'IN_PENALTY1','IN_PENALTY2','LOST_PENALTY1','LOST_PENALTY2'
                 ],
                 offenseList: [   // 进攻事件 橙色
-                    'FK1','FK2','AT1','AT2','YC1','YC2'
+                    'FK1','FK2','AT1','AT2','YC1','YC2','YELLCARD1','YELLCARD2'
                 ],
                 unimportList: [   // 不重要事件 白色
                     'Start','Stop','SUB1','SUB2','KO1','KO2',
@@ -577,8 +578,8 @@
 <style lang="less">
     .el-message-box {
         .message-btn {
-            font-size: 16px !important;
-            padding: 10px 50px !important;
+            font-size: 16px;
+            padding: 10px 50px;
         }
     }
 </style>

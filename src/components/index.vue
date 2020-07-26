@@ -430,7 +430,6 @@
                                 timestamp: (new Date()).valueOf()
                             }
                         }
-                        
                     }
                     this.postEventsData(params)
                 }
