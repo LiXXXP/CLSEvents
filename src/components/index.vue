@@ -31,18 +31,32 @@
                             <p>主队</p>
                             <p>客队</p>
                         </div>
-                        <div class="flex flex_around">
-                            <div class="btn flex flex_column"
+                        <div class="flex flex_center">
+                            <div :class="['team flex flex_column flex_wrap', 
+                                {'flex_wrap_reverse':item.i === '1'}]"
                                 v-for="(item,index) in teamBtnList"
                                 :key="item.i">
-                                <el-button
+                                <div class="btn"
                                     v-for="(key,btnindex) in item.btnList"
                                     :key="key.default"
-                                    :type="key.btnType" 
-                                    :plain="key.plain"
-                                    style="width:100%;margin:0 0 10px 0;"
-                                    @click="eventsAttack(index,btnindex,item.i)"
-                                >{{key.default}}</el-button>
+                                 >
+                                    <el-input-number 
+                                        :min="1" 
+                                        :max="100"
+                                        v-if="key.numVal"
+                                        v-model="key.numVal"
+                                        size="small"
+                                        controls-position="right"
+                                        style="width:100%;"
+                                        @change="eventsNum(key.numVal,index,btnindex)"
+                                    ></el-input-number>
+                                    <el-button
+                                        :type="key.btnType" 
+                                        :plain="key.plain"
+                                        style="width:100%;"
+                                        @click="eventsAttack(index,btnindex)"
+                                    >{{key.default}}</el-button>
+                                </div>
                             </div>
                         </div>
                         <div class="flex flex_center" style="margin-top:20px;">
@@ -124,6 +138,7 @@
                 isOpen: false,             // 是否点击开球
                 minDisable: false,         // 禁止手动输入补时时长
                 currentPageIndex: 1,       // 当前页
+                eventNum: 1,               // 角球 红牌 黄牌数量
             }
         },
         mounted() {
@@ -159,8 +174,8 @@
                         i: '1',
                         btnList: [
                             {
-                                btnType: 'success',
-                                type1: 'success',
+                                btnType: 'warning',
+                                type1: 'warning',
                                 type2: 'danger',
                                 text1: '主队进攻',
                                 text2: '主队进攻中...',
@@ -170,8 +185,19 @@
                                 plain: false,
                             },
                             {
-                                btnType: 'primary',
-                                type1: 'primary',
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '主队安全',
+                                text2: '主队安全中...',
+                                default: '主队安全',
+                                plain: false,
+                                info1: 'SAFE1',
+                                info2: 'CSAFE1',
+                            },
+                            {
+                                btnType: 'danger',
+                                type1: 'danger',
                                 type2: 'danger',
                                 text1: '主队危险进攻',
                                 text2: '主队危险中...',
@@ -186,7 +212,7 @@
                                 info: 'DFK1'
                             },
                             {
-                                btnType: 'warning',
+                                btnType: 'success',
                                 default: '主队进球确认',
                                 info: 'CONF_GOAL1'
                             },
@@ -196,29 +222,51 @@
                                 info: 'CGOAL1'
                             },
                             {
-                                btnType: 'warning',
+                                btnType: 'danger',
                                 default: '主队两黄变一红',
                                 info: 'YC_RC1'
                             },
                             {
+                                btnType: 'warning',
+                                default: '主队黄牌',
+                                info: 'YELLCARD1',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '主队红牌',
+                                info: 'REDCARD1',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '主队角球',
+                                info: 'CORNER1',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '主队点球',
+                                info: 'PENALTY1'
+                            },
+                            {
                                 btnType: 'success',
-                                type1: 'success',
-                                type2: 'danger',
-                                text1: '主队安全',
-                                text2: '主队安全中...',
-                                default: '主队安全',
-                                plain: false,
-                                info1: 'SAFE1',
-                                info2: 'CSAFE1',
-                            }
+                                default: '主队点球射进',
+                                info: 'IN_PENALTY1'
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '主队点球射失',
+                                info: 'LOST_PENALTY1'
+                            },
                         ]
                     },
                     {
                         i: '2',
                         btnList: [
                             {
-                                btnType: 'success',
-                                type1: 'success',
+                                btnType: 'warning',
+                                type1: 'warning',
                                 type2: 'danger',
                                 text1: '客队进攻',
                                 text2: '客队进攻中...',
@@ -228,8 +276,19 @@
                                 plain: false,
                             },
                             {
-                                btnType: 'primary',
-                                type1: 'primary',
+                                btnType: 'success',
+                                type1: 'success',
+                                type2: 'danger',
+                                text1: '客队安全',
+                                text2: '客队安全中...',
+                                default: '客队安全',
+                                info1: 'SAFE2',
+                                info2: 'CSAFE2',
+                                plain: false,
+                            },
+                            {
+                                btnType: 'danger',
+                                type1: 'danger',
                                 type2: 'danger',
                                 text1: '客队危险进攻',
                                 text2: '客队危险中...',
@@ -244,7 +303,7 @@
                                 info: 'DFK2'
                             },
                             {
-                                btnType: 'warning',
+                                btnType: 'success',
                                 default: '客队进球确认',
                                 info: 'CONF_GOAL2'
                             },
@@ -254,21 +313,43 @@
                                 info: 'CGOAL2'
                             },
                             {
-                                btnType: 'warning',
+                                btnType: 'danger',
                                 default: '客队两黄变一红',
                                 info: 'YC_RC2'
                             },
                             {
+                                btnType: 'warning',
+                                default: '客队黄牌',
+                                info: 'YELLCARD2',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '客队红牌',
+                                info: 'REDCARD2',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '客队角球',
+                                info: 'CORNER2',
+                                numVal: 1,
+                            },
+                            {
+                                btnType: 'info',
+                                default: '客队点球',
+                                info: 'PENALTY2'
+                            },
+                            {
                                 btnType: 'success',
-                                type1: 'success',
-                                type2: 'danger',
-                                text1: '客队安全',
-                                text2: '客队安全中...',
-                                default: '客队安全',
-                                info1: 'SAFE2',
-                                info2: 'CSAFE2',
-                                plain: false,
-                            }
+                                default: '客队点球射进',
+                                info: 'IN_PENALTY2'
+                            },
+                            {
+                                btnType: 'danger',
+                                default: '客队点球射失',
+                                info: 'LOST_PENALTY2'
+                            },
                         ]
                     }
                 ]
@@ -310,7 +391,7 @@
                 this.postEventsData(params)
             },
             // 进攻
-            eventsAttack(index, btnIndex, team) {
+            eventsAttack(index, btnIndex) {
                 if(!this.isOpen) {
                     Message.error('请先选择开球')
                 } else {
@@ -328,16 +409,35 @@
                         btnThis.plain = true
                         this.type = btnThis.info1
                     }
-                    // 参数
-                    let params = {
-                        match_id: this.matchId,
-                        event:{
-                            type: this.type,
-                            timestamp: (new Date()).valueOf()
+                    // 判断点球 红牌 黄牌数量
+                    let params = null
+                    if(btnThis.numVal) {
+                        // 参数
+                        params = {
+                            match_id: this.matchId,
+                            event:{
+                                stat: btnThis.numVal,
+                                type: this.type,
+                                timestamp: (new Date()).valueOf()
+                            }
                         }
+                    } else {
+                        // 参数
+                        params = {
+                            match_id: this.matchId,
+                            event:{
+                                type: this.type,
+                                timestamp: (new Date()).valueOf()
+                            }
+                        }
+                        
                     }
                     this.postEventsData(params)
                 }
+            },
+            // 角球 红牌 黄牌数量
+            eventsNum(value,index, btnIndex) {
+                this.teamBtnList[index].btnList[btnIndex].numVal = value
             },
             // 补时
             minChange(value) {
@@ -433,16 +533,32 @@
 
 <style lang='less' scoped>
     .page-content {
-        .teams {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        .btn {
-            width: 160px;
+        .btns {
+            .teams {
+                margin: 20px 0;
+                font-size: 18px;
+                font-weight: 600;
+            }
+            .team {
+                height: 360px;
+                margin-left: 50px;
+                &:first-child {
+                    margin-left: 0;
+                    margin-right: 50px;
+                }
+                .btn {
+                    width: 140px;
+                    margin: 0 40px 20px 0;
+                }
+            }
         }
         span {
             padding: 0 20px;
         }
+    }
+</style>
+<style lang="less">
+    .el-input__inner {
+        font-size: 16px;
     }
 </style>

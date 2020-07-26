@@ -1,17 +1,18 @@
 <template>
-    <div class="data-content" v-if="dataS">
-        <el-row>
+    <div class="data-content">
+        <el-row v-if="pageParam">
             <el-col :xs="16" :sm="16" :md="18" :lg="24" :xl="24">
                 <div class="header flex flex_between">
                     <div
                         :class="[
                             'block',
+                            dataS && dataS.event.type.indexOf('1') > -1 ?
                             {
-                                'safe': dataS.event.type.indexOf('1') > -1 && safeList.includes(dataS.event.type),
-                                'danger': dataS.event.type.indexOf('1') > -1 && dangerList.includes(dataS.event.type),
-                                'offense': dataS.event.type.indexOf('1') > -1 && offenseList.includes(dataS.event.type),
-                                'unimport': dataS.event.type.indexOf('1') > -1 && unimportList.includes(dataS.event.type)
-                            }
+                                'safe': safeList.includes(dataS.event.type),
+                                'danger': dangerList.includes(dataS.event.type),
+                                'offense': offenseList.includes(dataS.event.type),
+                                'unimport': unimportList.includes(dataS.event.type)
+                            }:''
                         ]"
                     >
                         <p class="game-time">
@@ -20,19 +21,20 @@
                         <div class="team flex flex_column flex_center">
                             <p>{{pageParam.teamA}}</p>
                             <p class="score">
-                                {{pageParam.scoreA}}
+                                {{datasList[0].home}}
                             </p>
                         </div>
                     </div>
                     <div
                         :class="[
                             'block',
+                            dataS && dataS.event.type.indexOf('2') > -1 ?
                             {
-                                'safe': dataS.event.type.indexOf('2') > -1 && safeList.includes(dataS.event.type),
-                                'danger': dataS.event.type.indexOf('2') > -1 && dangerList.includes(dataS.event.type),
-                                'offense': dataS.event.type.indexOf('2') > -1 && offenseList.includes(dataS.event.type),
-                                'unimport': dataS.event.type.indexOf('2') > -1 && unimportList.includes(dataS.event.type)
-                            }
+                                'safe': safeList.includes(dataS.event.type),
+                                'danger': dangerList.includes(dataS.event.type),
+                                'offense': offenseList.includes(dataS.event.type),
+                                'unimport': unimportList.includes(dataS.event.type)
+                            }:''
                         ]"
                     >
                         <p style="text-align:left;padding-left:20px">
@@ -41,7 +43,7 @@
                         <div class="team flex flex_column flex_center">
                             <p>{{pageParam.teamB}}</p>
                             <p class="score">
-                                {{pageParam.scoreB}}
+                                {{datasList[0].away}}
                             </p>
                         </div>
                     </div>
@@ -121,6 +123,8 @@
                         info: '进球',
                         type1: 'GOAL1',
                         type2: 'GOAL2',
+                        new1: 'CONF_GOAL1',
+                        new2: 'CONF_GOAL2'
                     },
                     {
                         home: 0,
@@ -128,6 +132,8 @@
                         info: '角球',
                         type1: 'CR1',
                         type2: 'CR2',
+                        new1: 'CORNER1',
+                        new2: 'CORNER2'
                     },
                     {
                         home: 0,
@@ -142,6 +148,8 @@
                         info: '点球',
                         type1: 'PEN1',
                         type2: 'PEN2',
+                        new1: 'PENALTY1',
+                        new2: 'PENALTY2'
                     },
                     {
                         home: 0,
@@ -163,6 +171,8 @@
                         info: '红牌',
                         type1: 'RC1',
                         type2: 'RC2',
+                        new1: 'REDCARD1',
+                        new2: 'REDCARD2'
                     },
                     {
                         home: 0,
@@ -170,6 +180,8 @@
                         info: '黄牌',
                         type1: 'YC1',
                         type2: 'YC2',
+                        new1: 'YELLCARD1',
+                        new2: 'YELLCARD2'
                     },
                     {
                         home: 0,
@@ -239,43 +251,43 @@
                         info: 'Foul Away'
                     },
                     {
-                        event: 'CR1',
+                        event: 'CORNER1',
                         info: 'Corner Home'
                     },
                     {
-                        event: 'CR2',
+                        event: 'CORNER2',
                         info: 'Corner Away'
                     },
                     {
-                        event: 'GOAL1',
+                        event: 'CONF_GOAL1',
                         info: 'Goal Home'
                     },
                     {
-                        event: 'GOAL2',
+                        event: 'CONF_GOAL2',
                         info: 'Goal Away'
                     },
                     {
-                        event: 'RC1',
+                        event: 'REDCARD1',
                         info: 'Red Card Home'
                     },
                     {
-                        event: 'RC2',
+                        event: 'REDCARD2',
                         info: 'Red Card Away'
                     },
                     {
-                        event: 'YC1',
+                        event: 'YELLCARD1',
                         info: 'Yellow Card Home'
                     },
                     {
-                        event: 'YC2',
+                        event: 'YELLCARD2',
                         info: 'Yellow Card Away'
                     },
                     {
-                        event: 'PEN1',
+                        event: 'PENALTY1',
                         info: 'Penalty kick Home'
                     },
                     {
-                        event: 'PEN2',
+                        event: 'PENALTY2',
                         info: 'Penalty kick Away'
                     },
                 ],
@@ -284,13 +296,12 @@
                 dataS: null,        // webSocket最新数据
                 timer: null,        // 定时器
                 // 比赛静时间
-                gameTime: '00:00'
+                gameTime: '00:00',  // 显示比赛时间
+                goals: [],          // 统计进球数
             }
         },
         mounted () {
             this.pageParam = {
-                scoreA: 0,
-                scoreB: 0,
                 date: getUrlParam('date'),
                 time: getUrlParam('time'),
                 teamA: getUrlParam('teamA'),
@@ -302,11 +313,13 @@
             if(localStorage.getItem('minute') || localStorage.getItem('second')) {
                 this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
             }
+            if(localStorage.getItem(`datas_${this.pageParam.channel}`)) {
+                this.datasList = JSON.parse(localStorage.getItem(`datas_${this.pageParam.channel}`))
+            }
         },
         methods: {
             // 初始化weosocket
             initWebSocket(){
-                // const wsuri = "ws://47.95.42.37/bcjj/football/websocket/server"
                 const wsuri = `ws://47.95.42.37/bcjj/football/websocket/${this.pageParam.channel}`
                 this.websock = new WebSocket(wsuri)
                 this.websock.onmessage = this.websocketonmessage
@@ -324,11 +337,6 @@
                 this.dataS = redata
                 // 赛事统计
                 this.datasCount(redata)
-                let goalArr = ['GOAL1','GOAL2']
-                if(goalArr.includes(redata.event.type)) {
-                    this.pageParam.scoreA = redata.event.scoreA
-                    this.pageParam.scoreB = redata.event.scoreB
-                }
                 // 事件滚动
                 this.eventsList.push(redata)
                 let _this = this
@@ -340,7 +348,8 @@
                     if(e.event === redata.event.type) {
                         MessageBox({
                             message: e.info,
-                            confirmButtonText: 'ok'
+                            confirmButtonText: 'ok',
+                            confirmButtonClass: 'message-btn'
                         })
                     }
                 })
@@ -358,6 +367,20 @@
                         this.datasList[0].home = data.event.scoreA
                         this.datasList[0].away = data.event.scoreB
                     }
+                    let confArr = ['CONF_GOAL1', 'CONF_GOAL2']
+                    if(confArr.includes(data.event.type)) {
+                        this.goals.push(data.event.type)
+                        const countGoal = this.goals.reduce( (allGoal,goal) => {
+                            if(goal in allGoal) {
+                                allGoal[goal]++
+                            } else {
+                                allGoal[goal] = 1
+                            }
+                            return allGoal
+                        },{})
+                        this.datasList[0].home = countGoal.CONF_GOAL1
+                        this.datasList[0].away = countGoal.CONF_GOAL2
+                    }
                 } else {
                     this.datasList.forEach( e => {
                         if(e.type1 === data.event.type) {
@@ -367,6 +390,7 @@
                         }
                     })
                 }
+                localStorage.setItem(`datas_${this.pageParam.channel}`,JSON.stringify(this.datasList))
             },
             // 比赛时间计时
             startTime(bolean,minute,second) {
@@ -425,6 +449,7 @@
                     localStorage.removeItem('minute')
                     localStorage.removeItem('second')
                     this.startTime(false)
+                    localStorage.removeItem(`datas_${this.pageParam.channel}`)
                 }
             }
         }
@@ -546,5 +571,14 @@
     }
     .unimport {
         background-color: @bg5;
+    }
+</style>
+
+<style lang="less">
+    .el-message-box {
+        .message-btn {
+            font-size: 16px !important;
+            padding: 10px 50px !important;
+        }
     }
 </style>
