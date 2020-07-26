@@ -326,7 +326,7 @@
             // 数据接收
             websocketonmessage(e){
                 const redata = JSON.parse(e.data)
-                console.log(redata)
+                // console.log(redata)
                 this.dataS = redata
                 // 赛事统计
                 this.datasCount(redata)
