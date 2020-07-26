@@ -130,10 +130,8 @@
                         home: 0,
                         away: 0,
                         info: '角球',
-                        type1: 'CR1',
-                        type2: 'CR2',
-                        new1: 'CORNER1',
-                        new2: 'CORNER2'
+                        type1: 'CORNER1',
+                        type2: 'CORNER2'
                     },
                     {
                         home: 0,
@@ -146,42 +144,36 @@
                         home: 0,
                         away: 0,
                         info: '点球',
-                        type1: 'PEN1',
-                        type2: 'PEN2',
-                        new1: 'PENALTY1',
-                        new2: 'PENALTY2'
+                        type1: 'PENALTY1',
+                        type2: 'PENALTY2'
                     },
                     {
                         home: 0,
                         away: 0,
                         info: '替补',
                         type1: 'SUB1',
-                        type2: 'SUB2',
+                        type2: 'SUB2'
                     },
                     {
                         home: 0,
                         away: 0,
                         info: '犯规',
                         type1: 'F1',
-                        type2: 'F2',
+                        type2: 'F2'
                     },
                     {
                         home: 0,
                         away: 0,
                         info: '红牌',
-                        type1: 'RC1',
-                        type2: 'RC2',
-                        new1: 'REDCARD1',
-                        new2: 'REDCARD2'
+                        type1: 'REDCARD1',
+                        type2: 'REDCARD2'
                     },
                     {
                         home: 0,
                         away: 0,
                         info: '黄牌',
-                        type1: 'YC1',
-                        type2: 'YC2',
-                        new1: 'YELLCARD1',
-                        new2: 'YELLCARD2'
+                        type1: 'YELLCARD1',
+                        type2: 'YELLCARD2'
                     },
                     {
                         home: 0,
@@ -334,7 +326,7 @@
             // 数据接收
             websocketonmessage(e){
                 const redata = JSON.parse(e.data)
-                // console.log(redata)
+                console.log(redata)
                 this.dataS = redata
                 // 赛事统计
                 this.datasCount(redata)
@@ -383,7 +375,7 @@
                         this.datasList[0].away = countGoal.CONF_GOAL2
                     }
                 } else {
-                    this.datasList.forEach( e => {
+                    this.datasList.forEach(e => {
                         if(e.type1 === data.event.type) {
                             e.home = data.event.stat
                         } else if(e.type2 === data.event.type) {
