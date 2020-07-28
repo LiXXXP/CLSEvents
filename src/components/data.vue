@@ -308,6 +308,9 @@
             }
             if(localStorage.getItem(`datas_${this.pageParam.channel}`)) {
                 this.datasList = JSON.parse(localStorage.getItem(`datas_${this.pageParam.channel}`))
+                if(localStorage.getItem('goals')) {
+                    this.goals = JSON.parse(localStorage.getItem('goals'))
+                }
             }
         },
         methods: {
@@ -355,24 +358,27 @@
             // 赛事统计
             datasCount(data) {
                 if( typeof(data.event.stat) == 'undefined' ) {
+                    // xml 进球数
                     let goalArr = ['GOAL1','GOAL2']
                     if(goalArr.includes(data.event.type)) {
                         this.datasList[0].home = data.event.scoreA
                         this.datasList[0].away = data.event.scoreB
                     }
-                    let confArr = ['CONF_GOAL1', 'CONF_GOAL2']
+                    // 进球确认
+                    let confArr = ['CONF_GOAL1', 'CONF_GOAL2', 'CGOAL1', 'CGOAL2']
                     if(confArr.includes(data.event.type)) {
                         this.goals.push(data.event.type)
+                        localStorage.setItem('goals',JSON.stringify(this.goals))
                         const countGoal = this.goals.reduce( (allGoal,goal) => {
-                            if(goal in allGoal) {
+                            if ( goal in allGoal ) {
                                 allGoal[goal]++
                             } else {
                                 allGoal[goal] = 1
                             }
                             return allGoal
                         },{})
-                        this.datasList[0].home = countGoal.CONF_GOAL1
-                        this.datasList[0].away = countGoal.CONF_GOAL2
+                        this.datasList[0].home = countGoal.CONF_GOAL1 - (countGoal.CGOAL1 || 0) || 0
+                        this.datasList[0].away = countGoal.CONF_GOAL2 - (countGoal.CGOAL2 || 0 ) || 0
                     }
                 } else {
                     this.datasList.forEach(e => {
@@ -424,7 +430,7 @@
         watch: {
             dataS(newVal,old) {
                 // 比赛静时间
-                if(this.dataS && this.dataS.event.type === 'Start') {
+                if(this.dataS && (this.dataS.event.type === 'KO1' || this.dataS.event.type === 'KO2')) {
                     localStorage.setItem('minute',0)
                     localStorage.setItem('second',0)
                     this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
