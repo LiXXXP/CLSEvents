@@ -135,10 +135,10 @@
                 minValue: 1,               // 补时时间值
                 type: '',                  // 参数type值
                 matchId: -1,               // 赛事id
-                isOpen: false,             // 是否点击开球
                 minDisable: false,         // 禁止手动输入补时时长
                 currentPageIndex: 1,       // 当前页
                 eventNum: 1,               // 角球 红牌 黄牌数量
+                timeType: 0,               // 上下半场补时 0: 上半场，1: 下半场
             }
         },
         mounted() {
@@ -366,18 +366,20 @@
                 if ( btnIndex === 0 ) { // 主队开球
                     this.handBtnList[1].disabled = true
                     this.type = 'KO1'
-                    this.isOpen = true
+                    localStorage.clear()
                 }
                 if ( btnIndex === 1 ) { // 客队开球
                     this.handBtnList[0].disabled = true
                     this.type = 'KO2'
-                    this.isOpen = true
+                    localStorage.clear()
                 }
                 if( btnIndex === 2 ) { // 上半场结束
                     this.type = 'Stop RT1'
+                    localStorage.setItem('timeType','0')
                 }
                 if( btnIndex === 3 ) { // 下半场开始
                     this.type = 'Start RT2'
+                    localStorage.setItem('timeType','1')
                 }
                 this.handBtnList[btnIndex].disabled = true
                 // 参数
@@ -392,47 +394,43 @@
             },
             // 进攻
             eventsAttack(index, btnIndex) {
-                if(!this.isOpen) {
-                    Message.error('请先选择开球')
+                let btnThis = this.teamBtnList[index].btnList[btnIndex]
+                if( typeof(btnThis.plain) == 'undefined' ) {
+                    this.type = btnThis.info
+                } else if(btnThis.plain) {
+                    btnThis.default = btnThis.text1
+                    btnThis.btnType = btnThis.type1
+                    btnThis.plain = false
+                    this.type = btnThis.info2
                 } else {
-                    let btnThis = this.teamBtnList[index].btnList[btnIndex]
-                    if( typeof(btnThis.plain) == 'undefined' ) {
-                        this.type = btnThis.info
-                    } else if(btnThis.plain) {
-                        btnThis.default = btnThis.text1
-                        btnThis.btnType = btnThis.type1
-                        btnThis.plain = false
-                        this.type = btnThis.info2
-                    } else {
-                        btnThis.default = btnThis.text2
-                        btnThis.btnType = btnThis.type2
-                        btnThis.plain = true
-                        this.type = btnThis.info1
-                    }
-                    // 判断点球 红牌 黄牌数量
-                    let params = null
-                    if(btnThis.numVal) {
-                        // 参数
-                        params = {
-                            match_id: this.matchId,
-                            event:{
-                                stat: btnThis.numVal,
-                                type: this.type,
-                                timestamp: (new Date()).valueOf()
-                            }
-                        }
-                    } else {
-                        // 参数
-                        params = {
-                            match_id: this.matchId,
-                            event:{
-                                type: this.type,
-                                timestamp: (new Date()).valueOf()
-                            }
-                        }
-                    }
-                    this.postEventsData(params)
+                    btnThis.default = btnThis.text2
+                    btnThis.btnType = btnThis.type2
+                    btnThis.plain = true
+                    this.type = btnThis.info1
                 }
+                // 判断点球 红牌 黄牌数量
+                let params = null
+                if(btnThis.numVal) {
+                    // 参数
+                    params = {
+                        match_id: this.matchId,
+                        event:{
+                            stat: btnThis.numVal,
+                            type: this.type,
+                            timestamp: (new Date()).valueOf()
+                        }
+                    }
+                } else {
+                    // 参数
+                    params = {
+                        match_id: this.matchId,
+                        event:{
+                            type: this.type,
+                            timestamp: (new Date()).valueOf()
+                        }
+                    }
+                }
+                this.postEventsData(params)
             },
             // 角球 红牌 黄牌数量
             eventsNum(value,index, btnIndex) {
@@ -445,7 +443,7 @@
             // 提交补时
             minAdd() {
                 // 参数
-                if(this.type === 'Start RT2') {
+                if(localStorage.getItem('timeType') === '1') {
                     this.type = 'Extra Time2'
                 } else {
                     this.type = 'Extra Time1'

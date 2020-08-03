@@ -70,6 +70,7 @@
                         </span>
                         <span>[{{item.event.game_time}}]</span>
                         <span>{{item.event.type}}</span>
+                        <span>{{item.event.stat}}</span>
                         <span>{{item.event.explain}}</span>
                         <span 
                             :class="[
@@ -428,7 +429,7 @@
             this.websock.close()
         },
         watch: {
-            dataS(newVal,old) {
+            dataS(newVal, old) {
                 // 比赛静时间
                 if(this.dataS && (this.dataS.event.type === 'KO1' || this.dataS.event.type === 'KO2')) {
                     localStorage.setItem('minute',0)
@@ -444,11 +445,17 @@
                     localStorage.setItem('second',0)
                     this.startTime(true,localStorage.getItem('minute'),localStorage.getItem('second'))
                 }
-                if((this.dataS && this.dataS.event.type === 'Stop') || localStorage.getItem('minute')>99) {
-                    localStorage.removeItem('minute')
-                    localStorage.removeItem('second')
+                if(this.dataS && this.dataS.event.type === 'Stop') {
+                    localStorage.clear()
                     this.startTime(false)
-                    localStorage.removeItem(`datas_${this.pageParam.channel}`)
+                    this.gameTime = '00:00'
+                }
+            },
+            gameTime(newVal, old) {
+                if(localStorage.getItem('minute') > 100) {
+                    localStorage.clear()
+                    this.startTime(false)
+                    this.gameTime = '00:00'
                 }
             }
         }
